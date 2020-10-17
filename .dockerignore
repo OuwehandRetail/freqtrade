@@ -2,7 +2,7 @@
 .gitignore
 Dockerfile
 .dockerignore
-config.json*
+#config.json*
 *.sqlite
 .coveragerc
 .eggs
