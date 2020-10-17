@@ -7,6 +7,8 @@ user_data/data/*
 user_data/notebooks/*
 freqtrade-plot.html
 freqtrade-profit-plot.html
+user_data/backtest_results/*
+user_data/plot
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -87,6 +89,7 @@ target/
 .venv
 .idea
 .vscode
+.DS_Store
 
 .pytest_cache/
 .mypy_cache/

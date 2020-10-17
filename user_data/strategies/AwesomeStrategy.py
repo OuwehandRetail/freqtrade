@@ -5,6 +5,7 @@ import numpy as np  # noqa
 import pandas as pd  # noqa
 from pandas import DataFrame
 import numpy
+import tabulate
 
 from freqtrade.strategy.interface import IStrategy
 
@@ -44,7 +45,7 @@ class AwesomeStrategy(IStrategy):
 
     # Optimal stoploss designed for the strategy.
     # This attribute will be overridden if the config file contains "stoploss".
-    stoploss = -0.20
+    stoploss = -1
 
     # Trailing stoploss
     trailing_stop = False
@@ -53,7 +54,7 @@ class AwesomeStrategy(IStrategy):
     # trailing_stop_positive_offset = 0.0  # Disabled / not configured
 
     # Optimal timeframe for the strategy.
-    timeframe = '5m'
+    timeframe = '1h'
 
     # Run "populate_indicators()" only for new candle.
     process_only_new_candles = False
@@ -64,12 +65,12 @@ class AwesomeStrategy(IStrategy):
     ignore_roi_if_buy_signal = False
 
     # Number of candles the strategy requires before producing valid signals
-    startup_candle_count: int = 20
+    startup_candle_count: int = 0
 
     # Optional order type mapping.
     order_types = {
-        'buy': 'limit',
-        'sell': 'limit',
+        'buy': 'market',
+        'sell': 'market',
         'stoploss': 'market',
         'stoploss_on_exchange': False
     }
@@ -83,17 +84,13 @@ class AwesomeStrategy(IStrategy):
     plot_config = {
         # Main plot indicators (Moving averages, ...)
         'main_plot': {
-            'tema': {},
-            'sar': {'color': 'white'},
+            # 'tema': {},
+            # 'sar': {'color': 'black'},
         },
         'subplots': {
             # Subplots - each dict defines one additional plot
-            "MACD": {
-                'macd': {'color': 'blue'},
-                'macdsignal': {'color': 'orange'},
-            },
-            "RSI": {
-                'rsi': {'color': 'red'},
+            "MOM": {
+                'mom': {'color': 'red'},
             }
         }
     }
@@ -127,8 +124,7 @@ class AwesomeStrategy(IStrategy):
 
         # momentum
         dataframe['mom'] = ta.MOM(dataframe['close'].values, 10)
-        mom = dataframe['mom']
-        print(numpy.float64(mom).astype(str))
+
         # ADX
         dataframe['adx'] = ta.ADX(dataframe)
 
@@ -169,7 +165,7 @@ class AwesomeStrategy(IStrategy):
         # dataframe['cci'] = ta.CCI(dataframe)
 
         # RSI
-        dataframe['rsi'] = ta.RSI(dataframe)
+        #dataframe['rsi'] = ta.RSI(dataframe)
 
         # # Inverse Fisher transform on RSI: values [-1.0, 1.0] (https://goo.gl/2JGGoy)
         # rsi = 0.1 * (dataframe['rsi'] - 50)
@@ -184,9 +180,9 @@ class AwesomeStrategy(IStrategy):
         # dataframe['slowk'] = stoch['slowk']
 
         # Stochastic Fast
-        stoch_fast = ta.STOCHF(dataframe)
-        dataframe['fastd'] = stoch_fast['fastd']
-        dataframe['fastk'] = stoch_fast['fastk']
+        #stoch_fast = ta.STOCHF(dataframe)
+        #dataframe['fastd'] = stoch_fast['fastd']
+        #dataframe['fastk'] = stoch_fast['fastk']
 
         # # Stochastic RSI
         # stoch_rsi = ta.STOCHRSI(dataframe)
@@ -194,13 +190,13 @@ class AwesomeStrategy(IStrategy):
         # dataframe['fastk_rsi'] = stoch_rsi['fastk']
 
         # MACD
-        macd = ta.MACD(dataframe)
-        dataframe['macd'] = macd['macd']
-        dataframe['macdsignal'] = macd['macdsignal']
-        dataframe['macdhist'] = macd['macdhist']
+        #macd = ta.MACD(dataframe)
+        #dataframe['macd'] = macd['macd']
+        #dataframe['macdsignal'] = macd['macdsignal']
+        #dataframe['macdhist'] = macd['macdhist']
 
         # MFI
-        dataframe['mfi'] = ta.MFI(dataframe)
+        #dataframe['mfi'] = ta.MFI(dataframe)
 
         # # ROC
         # dataframe['roc'] = ta.ROC(dataframe)
@@ -209,17 +205,17 @@ class AwesomeStrategy(IStrategy):
         # ------------------------------------
 
         # Bollinger Bands
-        bollinger = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=20, stds=2)
-        dataframe['bb_lowerband'] = bollinger['lower']
-        dataframe['bb_middleband'] = bollinger['mid']
-        dataframe['bb_upperband'] = bollinger['upper']
-        dataframe["bb_percent"] = (
-            (dataframe["close"] - dataframe["bb_lowerband"]) /
-            (dataframe["bb_upperband"] - dataframe["bb_lowerband"])
-        )
-        dataframe["bb_width"] = (
-            (dataframe["bb_upperband"] - dataframe["bb_lowerband"]) / dataframe["bb_middleband"]
-        )
+        #bollinger = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=20, stds=2)
+        #dataframe['bb_lowerband'] = bollinger['lower']
+        #dataframe['bb_middleband'] = bollinger['mid']
+        #dataframe['bb_upperband'] = bollinger['upper']
+        #dataframe["bb_percent"] = (
+        #    (dataframe["close"] - dataframe["bb_lowerband"]) /
+        #    (dataframe["bb_upperband"] - dataframe["bb_lowerband"])
+        #)
+        #dataframe["bb_width"] = (
+        #    (dataframe["bb_upperband"] - dataframe["bb_lowerband"]) / dataframe["bb_middleband"]
+        #)
 
         # Bollinger Bands - Weighted (EMA based instead of SMA)
         # weighted_bollinger = qtpylib.weighted_bollinger_bands(
@@ -253,17 +249,17 @@ class AwesomeStrategy(IStrategy):
         # dataframe['sma100'] = ta.SMA(dataframe, timeperiod=100)
 
         # Parabolic SAR
-        dataframe['sar'] = ta.SAR(dataframe)
+        #dataframe['sar'] = ta.SAR(dataframe)
 
         # TEMA - Triple Exponential Moving Average
-        dataframe['tema'] = ta.TEMA(dataframe, timeperiod=9)
+        #dataframe['tema'] = ta.TEMA(dataframe, timeperiod=9)
 
         # Cycle Indicator
         # ------------------------------------
         # Hilbert Transform Indicator - SineWave
-        hilbert = ta.HT_SINE(dataframe)
-        dataframe['htsine'] = hilbert['sine']
-        dataframe['htleadsine'] = hilbert['leadsine']
+        #hilbert = ta.HT_SINE(dataframe)
+        #dataframe['htsine'] = hilbert['sine']
+        #dataframe['htleadsine'] = hilbert['leadsine']
 
         # Pattern Recognition - Bullish candlestick patterns
         # ------------------------------------
@@ -339,13 +335,20 @@ class AwesomeStrategy(IStrategy):
         :param metadata: Additional information, like the currently traded pair
         :return: DataFrame with buy column
         """
+        dataframe['buy_signal'] = 0
         dataframe.loc[
             (
-                (dataframe['mom'] > 0) &  # Signal: RSI crosses above 30
+                (dataframe['mom'] > 0) &
                 (dataframe['volume'] > 0)  # Make sure Volume is not 0
             ),
+            'buy_signal'] = 1
+        dataframe['buy_signal'] = dataframe['buy_signal'].diff()
+        dataframe.loc[
+            (
+                dataframe['buy_signal'] == 1
+            ),
             'buy'] = 1
-
+        print(dataframe['buy'])
         return dataframe
 
     def populate_sell_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -357,8 +360,8 @@ class AwesomeStrategy(IStrategy):
         """
         dataframe.loc[
             (
-                (dataframe['mom'] <= 0)
-
+                (dataframe['mom'] < 0) &
+                (dataframe['volume'] > 0)
             ),
-            'sell'] = 1
+            'sell'] = 2
         return dataframe
