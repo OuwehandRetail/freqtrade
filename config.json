@@ -1,5 +1,5 @@
 {
-    "strategy" : "AwesomeStrategy",
+    "strategy" : "MomStrategy",
     "max_open_trades": 1,
     "stake_currency": "BTC",
     "stake_amount": 0.05,

@@ -15,7 +15,7 @@ import talib.abstract as ta
 import freqtrade.vendor.qtpylib.indicators as qtpylib
 
 
-class AwesomeStrategy(IStrategy):
+class MomStrategy(IStrategy):
     """
     This is a strategy template to get you started.
     More information in https://github.com/freqtrade/freqtrade/blob/develop/docs/bot-optimization.md
@@ -124,6 +124,14 @@ class AwesomeStrategy(IStrategy):
 
         # momentum
         dataframe['mom'] = ta.MOM(dataframe['close'].values, 10)
+        dataframe['signal'] = 0
+        dataframe.loc[
+            (
+                    (dataframe['mom'] > 0) &
+                    (dataframe['volume'] > 0)  # Make sure Volume is not 0
+            ),
+            'signal'] = 1
+        dataframe['signal'] = dataframe['signal'].diff()
 
         # ADX
         dataframe['adx'] = ta.ADX(dataframe)
@@ -335,20 +343,11 @@ class AwesomeStrategy(IStrategy):
         :param metadata: Additional information, like the currently traded pair
         :return: DataFrame with buy column
         """
-        dataframe['buy_signal'] = 0
         dataframe.loc[
             (
-                (dataframe['mom'] > 0) &
-                (dataframe['volume'] > 0)  # Make sure Volume is not 0
-            ),
-            'buy_signal'] = 1
-        dataframe['buy_signal'] = dataframe['buy_signal'].diff()
-        dataframe.loc[
-            (
-                dataframe['buy_signal'] == 1
+                dataframe['signal'] == 1
             ),
             'buy'] = 1
-        print(dataframe['buy'])
         return dataframe
 
     def populate_sell_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -360,8 +359,7 @@ class AwesomeStrategy(IStrategy):
         """
         dataframe.loc[
             (
-                (dataframe['mom'] < 0) &
-                (dataframe['volume'] > 0)
+                dataframe['signal'] == -1
             ),
-            'sell'] = 2
+            'sell'] = 1
         return dataframe
