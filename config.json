@@ -1,5 +1,5 @@
 {
-    "strategy" : "MomStrategy",
+    "strategy" : "BreakStrategy",
     "max_open_trades": 1,
     "stake_currency": "BTC",
     "stake_amount": 0.05,
@@ -68,7 +68,7 @@
         "minimum_winrate": 0.60,
         "minimum_expectancy": 0.20,
         "min_trade_number": 10,
-        "max_trade_duration_minute": 1440,
+        "max_trade_duration_minute": 9999,
         "remove_pumps": false
     },
     "telegram": {
